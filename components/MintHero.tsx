@@ -39,7 +39,7 @@ export const MintHero = () => {
     type: SCQueryType.INT,
     payload: {
       scAddress: smartContractAddress,
-      funcName: 'getTotalTokensLeft',
+      funcName: 'getTotalTokensLeftMeme',
       args: [],
     },
   });
