@@ -163,7 +163,7 @@ export const MintHero = () => {
           alt='discord'
         >
         </Image>
-        data?.data['data']
+        {data?.data['data']}
       </Text>
       <Text
         as="h2"
