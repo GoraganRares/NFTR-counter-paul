@@ -152,7 +152,7 @@ export const MintHero = () => {
         justifyContent='center'
         fontSize={{ base: '2xl', md: '3xl', lg: '5xl' }}
         textAlign={{ base: 'center', md: 'left' }}
-        data-mint={data?.data['data']}
+        // data-mint={}
         lineHeight="shorter"
         mb={5}
       >
@@ -163,7 +163,7 @@ export const MintHero = () => {
           alt='discord'
         >
         </Image>
-        Welcome!
+        data?.data['data']
       </Text>
       <Text
         as="h2"
