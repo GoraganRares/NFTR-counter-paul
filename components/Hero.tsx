@@ -46,7 +46,7 @@ export const Hero = () => {
       args: [],
     },
   });
-  const counter = data;
+  const counter = data?.data['data'];
   console.log(data);
   // let da = 'erd1ugfsm4wsk70aspz4agych4408599ehkmznkml9rugup766knw7fq02da8r';
   // function Json() {
@@ -144,7 +144,7 @@ export const Hero = () => {
   ]);
 
   const isContentCentered = useBreakpointValue({ base: true, md: false });
-
+  console.log(counter);
   return (
     <Box width="100%" display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
       {/* <Text
@@ -217,6 +217,7 @@ export const Hero = () => {
             dropData={dropData}
             dataLoading={isDropActive ? dropIsLoading : totalIsLoading}
         />
+        <Text>{counter}</Text>
         <HeaderMenuButtons enabled={['auth', 'mint', 'about']} />
       </Box>
       {/* <Box 
