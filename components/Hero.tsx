@@ -1,18 +1,150 @@
-import { Box, Text, Image, AbsoluteCenter } from '@chakra-ui/react';
+import { Box, Text, Image, useBreakpointValue, AbsoluteCenter } from '@chakra-ui/react';
 import { CollectionInfoBox } from './CollectionInfoBox';
 import { chainType, networkConfig } from '../config/network';
 import { HeaderMenu } from '../components/HeaderMenu';
 import { HeaderMenuButtons } from '../components/HeaderMenuButtons';
 import { motion } from 'framer-motion';
-
+import { useScQuery, SCQueryType } from '../hooks/interaction/useScQuery';
+import { MintForm } from './MintForm';
+import { Authenticated } from './Authenticated';
+import { useAccount } from '../hooks/auth/useAccount';
+import { LoginModalButton } from './LoginModalButton';
+import { useCallback } from 'react';
+import { Address } from '@elrondnetwork/erdjs';
 import {
-  collectionTicker,
+  isDropActive,
   smartContractAddress,
+  tokensLimitPerAddressTotal,
+  tokensLimitPerAddressPerDrop,
+  isAllowlistEnabled,
+  isMintingStarted,
+  collectionTicker,
   collectionSize,
 } from '../config/nftSmartContract';
+import { NFTLeftToMint } from './NFTLeftToMint';
+import { NFTAllowlistEnabled } from './NFTAllowlistEnabled';
+import { NFTMintedAlready } from './NFTMintedAlready';
+import { NFTLeftToMintPerAddress } from './NFTLeftToMintPerAddress';
 import { shortenHash } from '../utils/shortenHash';
 
 export const Hero = () => {
+  let { address } = useAccount();
+  // let adress: string = {address};
+  // if(address == 'erd1ugfsm4wsk70aspz4agych4408599ehkmznkml9rugup766knw7fq02da8r'){
+  //     console.log('da');
+  //   }
+  // console.log(address);
+  const {
+    data,
+    mutate: refreshData,
+    isLoading: totalIsLoading,
+  } = useScQuery({
+    type: SCQueryType.INT,
+    payload: {
+      scAddress: smartContractAddress,
+      funcName: 'getTotalTokensLeftMeme',
+      args: [],
+    },
+  });
+  const counter = data;
+  console.log(data);
+  // let da = 'erd1ugfsm4wsk70aspz4agych4408599ehkmznkml9rugup766knw7fq02da8r';
+  // function Json() {
+  //   if ( adress = 'erd1ugfsm4wsk70aspz4agych4408599ehkmznkml9rugup766knw7fq02da8r'){
+
+  //   }
+  // }
+  const {
+    data: dropData,
+    mutate: refreshDropData,
+    isLoading: dropIsLoading,
+  } = useScQuery({
+    type: SCQueryType.INT,
+    payload: {
+      scAddress: smartContractAddress,
+      funcName: 'getDropTokensLeft',
+      args: [],
+    },
+    autoInit: isDropActive,
+  });
+
+  // if ( {adress} )
+
+  const {
+    data: mintedData,
+    mutate: refreshMintedData,
+    isLoading: mintedDataLoading,
+  } = useScQuery({
+    type: SCQueryType.INT,
+    payload: {
+      scAddress: smartContractAddress,
+      funcName: 'getMintedPerAddressTotal',
+      args: address ? [Address.fromBech32(address)?.hex()] : [],
+    },
+    autoInit: Boolean(address),
+  });
+
+  const { data: mintedPerDropData, mutate: refreshMintedPerDropData } =
+    useScQuery({
+      type: SCQueryType.INT,
+      payload: {
+        scAddress: smartContractAddress,
+        funcName: 'getMintedPerAddressPerDrop',
+        args: address ? [Address.fromBech32(address)?.hex()] : [],
+      },
+      autoInit: Boolean(address && isDropActive),
+    });
+
+  const { data: allowlistCheckData, isLoading: allowlistCheckLoading } =
+    useScQuery({
+      type: SCQueryType.INT,
+      payload: {
+        scAddress: smartContractAddress,
+        funcName: 'getAllowlistAddressCheck',
+        args: address ? [Address.fromBech32(address)?.hex()] : [],
+      },
+      autoInit: Boolean(address && isAllowlistEnabled),
+    });
+
+  const handleRefreshData = useCallback(() => {
+    refreshData();
+    refreshMintedData();
+    refreshMintedPerDropData();
+    refreshDropData();
+  }, [
+    refreshData,
+    refreshMintedData,
+    refreshMintedPerDropData,
+    refreshDropData,
+  ]);
+
+  const getLeftToMintForUser = useCallback(() => {
+    let leftPerDrop = 0;
+    let leftInTotal = 0;
+
+    if (isAllowlistEnabled && Number(allowlistCheckData?.data?.data) === 0) {
+      return 0;
+    }
+
+    if (mintedPerDropData?.data?.data) {
+      leftPerDrop =
+        tokensLimitPerAddressPerDrop - Number(mintedPerDropData.data.data);
+    }
+    if (mintedData?.data?.data) {
+      leftInTotal = tokensLimitPerAddressTotal - Number(mintedData.data.data);
+    }
+    if (!isDropActive || leftPerDrop > leftInTotal) {
+      return leftInTotal;
+    }
+    return leftPerDrop;
+  }, [
+    allowlistCheckData?.data?.data,
+    mintedData?.data.data,
+    mintedPerDropData?.data.data,
+  ]);
+
+  const isContentCentered = useBreakpointValue({ base: true, md: false });
+
   return (
     <Box width="100%" display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
       {/* <Text
@@ -62,6 +194,7 @@ export const Hero = () => {
       </Text> */}
       <Box
         display='flex'
+        flexDirection='column'
         justifyContent='center'
         alignContent='center'
         position='relative'
@@ -79,6 +212,11 @@ export const Hero = () => {
           }}
           >
         </Image>
+        <NFTLeftToMint
+            data={data}
+            dropData={dropData}
+            dataLoading={isDropActive ? dropIsLoading : totalIsLoading}
+        />
         <HeaderMenuButtons enabled={['auth', 'mint', 'about']} />
       </Box>
       {/* <Box 
