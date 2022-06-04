@@ -4,7 +4,7 @@
 
 // Elven Tools NFT Smart Contract address - replace it with yours
 export const smartContractAddress =
-  'erd1qqqqqqqqqqqqqpgq2k920edpuletgrkrtft3krh34ufqymmrg20sl4gjrg';
+  'erd1qqqqqqqqqqqqqpgq57xeepejm6cycg8lhf2m4xapwdfc84mug20s3602uw';
 
 // Amount of the NFTs in the collection
 export const collectionSize = 384;
